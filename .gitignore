@@ -1,0 +1,26 @@
+#Dependecies
+node_modules/
+
+#Build
+dist/
+build/
+
+#Enviroments
+.env
+.env.*
+
+#Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/Editor
+.DS_Store
+.vscode/
+
+#Supabase local
+supabase/.temp
+
+#README
+readme_ai_payroll_reader.md
+backend_nest_js_guia_paso_a_paso.md
