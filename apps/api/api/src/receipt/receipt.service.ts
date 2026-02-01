@@ -28,7 +28,6 @@ export class ReceiptService{
         //Enviar texto a OpenAI
         const extractedData = await this.aiService.extracReceiptData(text)
 
-        console.log('extractedData:',extractedData)
         //validar con ZOD
 
         //guardar en la BD//
@@ -57,8 +56,6 @@ export class ReceiptService{
             throw new BadRequestException('Error al insertar los datos en supabase', error.message)
         }
 
-        console.log('Datos guardados exitosamente en supabase', data)
-
         return extractedData
        } catch (error) {
         if(error instanceof BadRequestException){
@@ -67,6 +64,62 @@ export class ReceiptService{
         console.log('Error procesando el PDF', error)
         throw new BadRequestException('Error procesando el recibo', error)
        }
+    }
+
+    //OBTENGO TODOS LOS RECIBOS
+    async getReceiptData(){
+        try {
+        const supabase = this.supabaseService.getClient();
+
+        const {data, error} = await supabase
+        .from('recibos_sueldo_core')
+        .select()
+        .single()
+
+            if(error){
+            console.log('Ocurrio un error al llamar a supabase', error);
+            throw new BadRequestException('Ocurrio un error al llamar a supabase', error.message)
+            }
+
+            return data
+
+        } catch (error) {
+            if(error instanceof BadRequestException){
+                throw error
+            }
+            console.log('Ocurrio un error a solicitar los dato en supabase', error)
+            throw new BadRequestException('Ocurrio un error al llamar a supabase', error)
+        }
+        
+    }
+
+    async getReceiptFile(file: string){
+
+        if(!file || file.length < 5){
+             throw new BadRequestException('El tipo de file no es valido o pocos caracteres')
+        }
+        try {
+            const supabase = this.supabaseService.getClient()
+
+            const {data, error} = await supabase
+            .from('recibos_sueldo_core')
+            .select()
+            .eq('legajo', file)
+
+            if(error){
+                console.log('Ocurrio un error al consultar en supabase', error)
+                throw new BadRequestException('Ocurrio un error al consultar en supabase', error.message)
+            }
+
+            return data
+
+        } catch (error) {
+            if(error instanceof BadRequestException){
+                throw error;
+            }
+            console.log('Ocurrio un error al consultar el legajo en subabase', error)
+            throw new BadRequestException('Ocurrio un error al consultar el legajo en subabase', error)
+        }
     }
 
 }
