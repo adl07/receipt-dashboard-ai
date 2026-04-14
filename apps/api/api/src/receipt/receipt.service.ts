@@ -74,7 +74,7 @@ export class ReceiptService{
         const {data, error} = await supabase
         .from('recibos_sueldo_core')
         .select()
-        .single()
+        //.single()
 
             if(error){
             console.log('Ocurrio un error al llamar a supabase', error);
