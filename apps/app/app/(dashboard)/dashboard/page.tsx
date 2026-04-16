@@ -118,7 +118,19 @@ export default function DashboardPage () {
 
   const {isLoading, data, error} = useGetReceipt()
 
-  console.log('data', data)
+  //const name = data[0].empleado;
+  
+   
+  const formatedFullName =(name: string)=>{
+    if(!name) return "";
+    
+    const format = name.trim().split(" ").filter(Boolean);
+
+    const firstLetter = format[0]?.substring(0,1) || ""
+    const secondLetter = format[1]?.substring(0,1) || ""
+    const finalFormat = (firstLetter+secondLetter).toUpperCase()
+    return finalFormat
+  }
 
   return (
     <div className="flex flex-col">
@@ -203,8 +215,7 @@ export default function DashboardPage () {
                   <div className="flex items-center gap-4">
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {receipt.empleado
-                          }
+                        {formatedFullName(receipt.empleado)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
