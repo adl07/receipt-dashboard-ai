@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useUploadReceipt } from "@/hooks/uploadReceipt"
 
 interface UploadedFile {
   file: File
@@ -55,6 +56,8 @@ export default function UploadPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadComplete, setUploadComplete] = useState(false)
+
+  const {isPending, mutateAsync} = useUploadReceipt()
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -125,20 +128,29 @@ export default function UploadPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+      if(uploadedFiles.length > 0){
+        try {
+        await mutateAsync(uploadedFiles[0].file)
 
-    setIsSubmitting(false)
-    setUploadComplete(true)
+        setIsSubmitting(false)
+        setUploadComplete(true)
 
-    // Redirect after success
-    setTimeout(() => {
-      router.push("/receipts")
-    }, 2000)
+        // Redirect after success
+        setTimeout(() => {
+          router.push("/receipts")
+        }, 2000)
+
+      } catch (error) {
+        console.log('Error al subir el archivo', error)
+        setIsSubmitting(false)
+        throw new Error('Error al subir el archivo')
+      }
+    }
   }
 
   const allFilesUploaded = uploadedFiles.every((f) => f.status === "success")
   const hasFiles = uploadedFiles.length > 0
+
 
   if (uploadComplete) {
     return (

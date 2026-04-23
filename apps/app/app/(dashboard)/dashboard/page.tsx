@@ -114,18 +114,10 @@ const quickActions = [
 
 export default function DashboardPage () {
 
-
-
   const {isLoading, data, error} = useGetReceipt()
-
-  //const name = data[0].empleado;
-  
-   
   const formatedFullName =(name: string)=>{
     if(!name) return "";
-    
     const format = name.trim().split(" ").filter(Boolean);
-
     const firstLetter = format[0]?.substring(0,1) || ""
     const secondLetter = format[1]?.substring(0,1) || ""
     const finalFormat = (firstLetter+secondLetter).toUpperCase()
