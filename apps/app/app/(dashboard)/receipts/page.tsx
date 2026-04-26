@@ -53,6 +53,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useGetReceipt } from "@/hooks/getReceipt"
+
+interface receiptsDataInterface{
+  id: string,
+  empleado: string,
+  legajo: string,
+  fecha: string,
+  antiguedad: string,
+  puesto: string,
+  categoria: string,
+}
+
+
+const categoriaTypes = {
+  Standard: "bg-blue-400",
+  Convenio: "bg-gray-400",
+}
 
 const receiptsData = [
   {
@@ -145,16 +162,22 @@ export default function ReceiptsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [receiptToDelete, setReceiptToDelete] = useState<string | null>(null)
 
-  const filteredReceipts = receiptsData.filter((receipt) => {
+
+  const {isPending, data, error} = useGetReceipt();
+
+
+  console.log('data', data)
+
+  const filteredReceipts = data.filter((receipt: receiptsDataInterface) => {
     const matchesSearch =
-      receipt.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      receipt.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      receipt.description.toLowerCase().includes(searchQuery.toLowerCase())
+      receipt.empleado.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      //receipt.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      receipt.fecha.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesStatus =
-      statusFilter === "all" || receipt.status === statusFilter
+    /*const matchesStatus =
+      statusFilter === "all" || receipt.status === statusFilter*/
 
-    return matchesSearch && matchesStatus
+    return matchesSearch
   })
 
   const handleSelectAll = (checked: boolean) => {
@@ -315,7 +338,7 @@ export default function ReceiptsPage() {
         <Card>
           <CardHeader className="py-4">
             <CardTitle className="text-base font-medium">
-              {filteredReceipts.length} receipts found
+              Total de documentos: {filteredReceipts.length} 
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -331,16 +354,15 @@ export default function ReceiptsPage() {
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>File Name</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right pr-6">Actions</TableHead>
+                  <TableHead>Empleado</TableHead>
+                  <TableHead>Archivo</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Convenio</TableHead>
+                  <TableHead className="text-right pr-6">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReceipts.map((receipt) => (
+                {filteredReceipts.map((receipt: receiptsDataInterface) => (
                   <TableRow key={receipt.id}>
                     <TableCell className="pl-6">
                       <Checkbox
@@ -352,9 +374,9 @@ export default function ReceiptsPage() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{receipt.employeeName}</p>
+                        <p className="font-medium">{receipt.empleado}</p>
                         <p className="text-sm text-muted-foreground">
-                          {receipt.employeeId}
+                          {receipt.legajo}
                         </p>
                       </div>
                     </TableCell>
@@ -362,32 +384,21 @@ export default function ReceiptsPage() {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <p className="text-sm">{receipt.fileName}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {receipt.fileSize}
-                          </p>
+                          <p className="text-sm">{receipt.legajo}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {new Date(receipt.date).toLocaleDateString("en-US", {
+                      {new Date(receipt.fecha).toLocaleDateString("en-US", {
+                        timeZone: "UTC",
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
                     </TableCell>
-                    <TableCell>{receipt.description}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          receipt.status === "processed"
-                            ? "default"
-                            : receipt.status === "pending"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {receipt.status}
+                      <Badge variant="secondary" className={`gap-1 text-white  ${categoriaTypes[receipt.categoria] || ""}`}>
+                        {receipt.categoria}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right pr-6">
@@ -395,19 +406,19 @@ export default function ReceiptsPage() {
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
                             <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Actions</span>
+                            <span className="sr-only">Acciones</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
                             <Link href={`/receipts/${receipt.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
-                              View Details
+                              Ver Detalles
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem>
                             <Download className="mr-2 h-4 w-4" />
-                            Download
+                            Descargar
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -415,7 +426,7 @@ export default function ReceiptsPage() {
                             onClick={() => handleDeleteClick(receipt.id)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            Eliminar
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
